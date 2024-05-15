@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
@@ -6,10 +6,11 @@ app = Flask(__name__)
 def index():
     return render_template("index.html")
 
-@app.post("/user")
+@app.post("/clicked")
 def user():
-    user_input = request.form["user"]
-    return redirect("/")
+    user_text = request.form["user-input"]
+    assistant_text = "Thinking..."
+    return render_template("filler.html", user_text=user_text, assistant_text=assistant_text)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

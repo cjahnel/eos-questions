@@ -5,10 +5,11 @@ import pickle
 from openai import OpenAI
 
 import chromadb
-chroma_client = chromadb.Client()
 
-collection = chroma_client.get_or_create_collection("jahnel-group-docs")
 client = OpenAI()
+
+chroma_client = chromadb.Client()
+collection = chroma_client.get_or_create_collection("jahnel-group-docs")
 
 def vectorize(data, model="text-embedding-ada-002") -> list[list[float]]:
     embeddings = client.embeddings.create(
