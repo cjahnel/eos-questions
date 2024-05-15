@@ -3,11 +3,9 @@ import os
 import pickle
 
 from openai import OpenAI
-
-import chromadb
-
 client = OpenAI()
 
+import chromadb
 chroma_client = chromadb.Client()
 collection = chroma_client.get_or_create_collection("jahnel-group-docs")
 
@@ -49,32 +47,39 @@ def load_embeddings(data, engine="text-embedding-ada-002"):
     
     return embeddings
 
-data = {
-    "model": "gpt-3.5-turbo-0613",
-    "messages": [
-        {"role": "user", "content": "Who is the CEO of Jahnel Group?"}
-    ],
-    "functions": [
+def completion(content: str):
+    tools = [
         {
-            "name": "searchDocs",
-            "description": "Retrieve external information about Jahnel Group from company documents",
-            "parameters": {
-                "type": "string"
+            "type": "function",
+            "function": {
+                "name": "searchDocs",
+                "description": "Retrieve external information about Jahnel Group from company documents",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "summary": {
+                            "type": "string",
+                            "description": "The keywords picked out from the user's input",
+                        }
+                    },
+                    "required": ["summary"]
+                }
             }
         }
     ]
-}
 
-def main():
+    messages=[
+        {"role": "system", "content": "You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."},
+        {"role": "user", "content": content}
+    ]
+
     completion = client.chat.completions.create(
         model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."},
-            {"role": "user", "content": "Compose a poem that explains the concept of recursion in programming."}
-        ]
+        messages=messages,
+        tools=tools,
+        tool_choice="auto"
     )
+    
+    message = completion.choices[0].message
 
-    print(completion.choices[0].message)
-
-if __name__ == "__main__":
-    main()
+    return message.content or message.tool_calls[0].function

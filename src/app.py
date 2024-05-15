@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+from embeddings import completion
 
 app = Flask(__name__)
 
@@ -9,7 +10,7 @@ def index():
 @app.post("/clicked")
 def user():
     user_text = request.form["user-input"]
-    assistant_text = "Thinking..."
+    assistant_text = completion(user_text)
     return render_template("filler.html", user_text=user_text, assistant_text=assistant_text)
 
 if __name__ == "__main__":
