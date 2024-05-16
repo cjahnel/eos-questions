@@ -2,12 +2,14 @@ import hashlib
 import os
 import pickle
 
+
 from openai import OpenAI
 client = OpenAI()
 
 import chromadb
 chroma_client = chromadb.Client()
-collection = chroma_client.get_or_create_collection("jahnel-group-docs")
+openai_ef = chromadb.utils.embedding_functions.OpenAIEmbeddingFunction(os.getenv("OPENAI_API_KEY"))
+collection = chroma_client.get_or_create_collection("jahnel-group-docs", embedding_function=openai_ef)
 
 def vectorize(data, model="text-embedding-ada-002") -> list[list[float]]:
     embeddings = client.embeddings.create(
@@ -83,3 +85,23 @@ def completion(content: str):
     message = completion.choices[0].message
 
     return message.content or message.tool_calls[0].function
+
+def main():
+    # switch `add` to `upsert` to avoid adding the same documents every time
+    collection.upsert(
+        documents=[
+            "This is a document about pineapple",
+            "This is a document about oranges"
+        ],
+        ids=["id1", "id2"]
+    )
+
+    results = collection.query(
+        query_texts=["This is a query document about florida"], # Chroma will embed this for you
+        n_results=2 # how many results to return
+    )
+
+    print(results)
+
+if __name__ == "__main__":
+    main()
