@@ -9,11 +9,11 @@
 </head>
 <body>
     <main class="container p-5">
-        <article id="target"></article>
+        <article id="chat"></article>
     </main>
     <footer class="container fixed-bottom mb-5 text-center">
-        <form hx-post="/clicked" hx-target="#target" hx-swap="beforeend" hx-on::after-request="this.reset()">
-            <input type="text" name="user-input" id="userInput">
+        <form hx-post="/clicked" hx-target="#chat" hx-swap="beforeend" hx-on::after-request="this.reset()">
+            <input type="text" name="userInput">
             <input type="submit" value="Submit">
         </form>
     </footer>
