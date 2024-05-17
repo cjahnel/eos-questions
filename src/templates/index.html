@@ -13,7 +13,7 @@
     </main>
     <footer class="container fixed-bottom mb-5 text-center">
         <form hx-post="/clicked" hx-target="#chat" hx-swap="beforeend" hx-on::after-request="this.reset()">
-            <input type="text" name="userInput">
+            <input class="w-50" type="text" name="userInput">
             <input type="submit" value="Submit">
         </form>
     </footer>

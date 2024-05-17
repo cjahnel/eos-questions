@@ -12,8 +12,8 @@ collection = chroma_client.get_or_create_collection("jahnel-group-docs", embeddi
 collection.upsert(
     documents=[
         "The CEO, Darrin Jahnel, was born in 1976.",
-        "Jahnel Group was founded by the CEO and his brother",
-        "Darrin used to play basketball with his brother, Jason"
+        "Jahnel Group was founded by the CEO and his brother.",
+        "Darrin used to play basketball with his brother, Jason."
     ],
     ids=["id1", "id2", "id3"]
 )
@@ -37,7 +37,7 @@ def answer(content: str):
         }
     }]
 
-    messages=[
+    messages = [
         {
             "role": "system",
             "content": "You are an assistant to employees at Jahnel Group. \
@@ -64,10 +64,23 @@ def answer(content: str):
         arguments = json.loads(function.arguments)
         summary = arguments["summary"]
         documents = searchDocs(summary).get("documents")[0]
-        return [str(document) for document in documents]
+        result = " ".join(documents)
+
+    messages.append({
+        "role": "function",
+        "name": "searchDocs",
+        "content": result
+    })
+    
+    completion = openai_client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=messages
+    )
+
+    return completion.choices[0].message.content
     
 def searchDocs(summary: str) -> QueryResult:
     return collection.query(
         query_texts=[summary],
-        n_results=2
+        n_results=3
     )
