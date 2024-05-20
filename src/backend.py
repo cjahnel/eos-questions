@@ -18,7 +18,7 @@ collection.upsert(
     ids=["id1", "id2", "id3"]
 )
 
-def answer(content: str):
+def answer(content: str) -> str:
     tools = [{
         "type": "function",
         "function": {
@@ -37,6 +37,7 @@ def answer(content: str):
         }
     }]
 
+    # TODO: Update Message History
     messages = [
         {
             "role": "system",
