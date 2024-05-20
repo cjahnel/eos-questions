@@ -18,6 +18,12 @@ collection.upsert(
     ids=["id1", "id2", "id3"]
 )
 
+messages = [{
+    "role": "system",
+    "content": "You are an assistant to employees at Jahnel Group. \
+                Your job is to answer questions about the company."
+}]
+
 def answer(content: str) -> str:
     tools = [{
         "type": "function",
@@ -37,15 +43,7 @@ def answer(content: str) -> str:
         }
     }]
 
-    # TODO: Update Message History
-    messages = [
-        {
-            "role": "system",
-            "content": "You are an assistant to employees at Jahnel Group. \
-                        Your job is to answer questions about the company."
-        },
-        {"role": "user", "content": content}
-    ]
+    messages.append({"role": "user", "content": content})
 
     completion = openai_client.chat.completions.create(
         model="gpt-3.5-turbo",
@@ -57,6 +55,7 @@ def answer(content: str) -> str:
     message = completion.choices[0].message
 
     if message.content:
+        messages.append({"role": "assistant", "content": message.content})
         return message.content
     
     function = message.tool_calls[0].function
@@ -66,19 +65,24 @@ def answer(content: str) -> str:
         summary = arguments["summary"]
         documents = searchDocs(summary).get("documents")[0]
         result = " ".join(documents)
-
-    messages.append({
-        "role": "function",
-        "name": "searchDocs",
-        "content": result
-    })
+        messages.append({
+            "role": "function",
+            "name": "searchDocs",
+            "content": result
+        })
+    else:
+        raise ValueError(f"Unknown function: {function.name}")
     
     completion = openai_client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=messages
     )
 
-    return completion.choices[0].message.content
+    # repeating code, should probably abstract this as a function
+    message = completion.choices[0].message
+
+    messages.append({"role": "assistant", "content": message.content})
+    return message.content
     
 def searchDocs(summary: str) -> QueryResult:
     return collection.query(
