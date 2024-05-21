@@ -1,15 +1,11 @@
-from flask import Flask, render_template, request
+from flask import Flask, request
 from backend import answer
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 
-# @app.route("/")
-# def index():
-#     return render_template("index.html")
-
-@app.post("/clicked")
+@app.post("/api")
 def user():
     user_msg = request.form["userInput"]
     assistant_msg = answer(user_msg)

@@ -1,13 +1,18 @@
 import json
 import os
+
 from openai import OpenAI
-from chromadb import Client, QueryResult
+from chromadb import PersistentClient, QueryResult
 from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
 
 openai_client = OpenAI()
-chroma_client = Client()
-openai_ef = OpenAIEmbeddingFunction(os.getenv("OPENAI_API_KEY"))
-collection = chroma_client.get_or_create_collection("jahnel-group-docs", embedding_function=openai_ef)
+chroma_client = PersistentClient(path="../data")
+emb_fn = OpenAIEmbeddingFunction(os.getenv("OPENAI_API_KEY"))
+collection = chroma_client.get_or_create_collection(
+    name="jahnel-group-docs",
+    embedding_function=emb_fn,
+    metadata={"hnsw:space": "ip"}
+)
 
 collection.upsert(
     documents=[
