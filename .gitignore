@@ -1,4 +1,5 @@
+.firebase/
 .vscode/
-venv/
-.env
 original/
+
+.env
