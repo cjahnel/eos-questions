@@ -1,34 +1,30 @@
-import os
-from pinecone import Pinecone
-
-pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
+from main import pc
+from main import client
 
 
 def searchDocs(summary: str) -> str:
+    # TODO: Add an additional optional query parameter with the chapter number and text?
+    
+    model = "text-embedding-3-small"
+
+    embed = client.embeddings.create(
+        input=summary,
+        model=model
+    ).data[0].embedding
+
     index = pc.Index("eos-questions")
+    # index.describe_index_stats()
 
-    # TODO: Add an additional optional query parameter with the chapter number and text
+    # TODO: GPT-3.5 can handle 16,385 tokens, so we need to ensure the data first in context upon retrieval, may need to summarize with GPT-4
 
-    # TODO: (Later version?) Ask GPT-4 to describe the images and upload them to the index
-    # tagged as images and can call with another function upon request, images stored in Firebase Storage
-
-    query_results = index.query(
-        namespace="eos-docs",
+    result = index.query(
+        # namespace="eos-docs",
         # id=ids[0],
-        vector=[1.0, 1.5],
-        top_k=3,
-        include_values=True,
+        vector=embed,
+        top_k=5,
+        # include_values=True,
         include_metadata=True
+        # filter={"genre": {"$eq": "action"}}
     )
 
-    return " ".join([doc["id"] for doc in query_results["hits"]])
-
-    # ChromaDB query code:
-    # 
-    # result = collection.query(
-    #     query_texts=[summary],
-    #     n_results=3
-    # )
-    # 
-    # docs = result.get("documents")[0]
-    # return " ".join(docs)
+    return "\n\n".join([match["metadata"]["text"] for match in result["matches"]])
