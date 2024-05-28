@@ -13,7 +13,6 @@ def searchDocs(summary: str) -> str:
     ).data[0].embedding
 
     index = pc.Index("eos-questions")
-    # index.describe_index_stats()
 
     # TODO: GPT-3.5 can handle 16,385 tokens, so we need to ensure the data first in context upon retrieval, may need to summarize with GPT-4
 
@@ -22,7 +21,6 @@ def searchDocs(summary: str) -> str:
         # id=ids[0],
         vector=embed,
         top_k=5,
-        # include_values=True,
         include_metadata=True
         # filter={"genre": {"$eq": "action"}}
     )

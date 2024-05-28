@@ -52,4 +52,5 @@ def upload_chunk(doc_name: str) -> None:
 
 if __name__ == "__main__":
     upload_chunk("get-a-grip")
+    # upload_chunk("traction")
     upload_chunk("wth-is-eos")
