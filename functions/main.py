@@ -13,10 +13,10 @@ pc = None
 
 template_string = """
 <article class="row my-2 rounded-1 border border-3 border-info-subtle p-3">
-    {{ userMsg }}
+    {{ user_msg }}
 </article>
 <article class="row my-2 rounded-1 bg-info text-light p-3">
-    {{ assistantMsg }}
+    {{ assistant_msg|safe }}
 </article>
 """
 
@@ -33,9 +33,7 @@ def new_message(req: https_fn.Request) -> https_fn.Response:
     system_message = {
         "role": "system",
         "content": "You are a helpful assistant to business owners who are implementing EOS, the Entrepreneurial Operating System. \
-            Your job is to provide concise and accurate answers to any questions they have about EOS. \
-            If you already know the answer, you can answer directly. Otherwise, search the official EOS books. \
-            If you are listing a series of items, please use new lines to separate them."
+                    Your job is to provide concise and accurate answers to any questions they have about EOS."
     }
 
     # Equip the assistant with the Function
@@ -90,14 +88,15 @@ def new_message(req: https_fn.Request) -> https_fn.Response:
         model=model,
         messages=messages,
         tools=tools,
-        tool_choice="auto"
-        # TODO: Play with temperature
-        # temperature=0
+        tool_choice="auto",
+        max_tokens=1024,
+        temperature=0
     ).choices[0].message
 
     # If GPT generated a response, add it to the conversation and return dialogue
     if assistant_msg.content:
-        return render_template_string(template_string, userMsg=user_msg, assistantMsg=assistant_msg.content)
+        assistant_msg_formatted = assistant_msg.content.replace("\n", "<br>")
+        return render_template_string(template_string, user_msg=user_msg, assistant_msg=assistant_msg_formatted)
 
     # No message was given, so get the function
     function = assistant_msg.tool_calls[0].function
@@ -113,6 +112,9 @@ def new_message(req: https_fn.Request) -> https_fn.Response:
             pc = Pinecone(api_key=api_key)
         
         from functions import searchBooks
+
+        # TODO? provide some kind of message to the user that a function is being called
+        # print(f"searchBooks({summary})")
 
         summary = args["summary"]
         
@@ -131,10 +133,14 @@ def new_message(req: https_fn.Request) -> https_fn.Response:
     # Ask GPT to generate a response with the function result in its context
     assistant_msg = client.chat.completions.create(
         model=model,
-        messages=messages
+        messages=messages,
+        max_tokens=1024,
+        temperature=0
     ).choices[0].message
-    
-    # TODO: Add streamimg?
+
+    # TODO: Add streaming?
+
+    assistant_msg_formatted = assistant_msg.content.replace("\n", "<br>")
 
     # Return the dialogue
-    return render_template_string(template_string, userMsg=user_msg, assistantMsg=assistant_msg.content)
+    return render_template_string(template_string, user_msg=user_msg, assistant_msg=assistant_msg_formatted)
