@@ -2,12 +2,12 @@ import os
 import re
 import tiktoken
 
-def chunk_doc(doc_name: str) -> None:
-    doc_dir = os.path.join("docs", doc_name)
-    doc_content_path = f"{os.path.join(doc_dir, doc_name)}-content.txt"
+def chunk_book(book_name: str) -> None:
+    book_dir = os.path.join("books", book_name)
+    book_content_path = f"{os.path.join(book_dir, book_name)}-content.txt"
 
-    with open(doc_content_path, "r") as doc:
-        chunks = doc.read().split("\n\n")
+    with open(book_content_path, "r") as book:
+        chunks = book.read().split("\n\n")
 
         is_chapter_headline = False
         section_number = 0
@@ -38,7 +38,7 @@ def chunk_doc(doc_name: str) -> None:
                 is_chapter_headline = False
                 section_number += 1
 
-            chapter_dir_path = os.path.join(doc_dir, "chunks", chapter_dir)
+            chapter_dir_path = os.path.join(book_dir, "chunks", chapter_dir)
 
             if is_chapter_headline:
                 os.makedirs(chapter_dir_path, exist_ok=True)
@@ -46,7 +46,7 @@ def chunk_doc(doc_name: str) -> None:
             else:
                 chunk_path = os.path.join(chapter_dir_path, f"section{section_number}")
             
-            # TODO: Possibly get a synopsis of each chunk from GPT-4
+            # TODO? Store a synopsis of each chunk from GPT-4o
 
             with open(f"{chunk_path}.txt", "w+") as outfile:
                 enc = tiktoken.get_encoding("cl100k_base")
@@ -318,6 +318,6 @@ wth_is_eos_outline = """
 """
 
 if __name__ == "__main__":
-    chunk_doc("get-a-grip")
-    # chunk_doc("traction")
-    chunk_doc("wth-is-eos")
+    chunk_book("get-a-grip")
+    # chunk_book("traction")
+    chunk_book("wth-is-eos")

@@ -2,9 +2,7 @@ from main import pc
 from main import client
 
 
-def searchDocs(summary: str) -> str:
-    # TODO: Add an additional optional query parameter with the chapter number and text?
-    
+def searchBooks(summary: str, book: str = None, chapter: str = None) -> str:
     model = "text-embedding-3-small"
 
     embed = client.embeddings.create(
@@ -14,15 +12,29 @@ def searchDocs(summary: str) -> str:
 
     index = pc.Index("eos-questions")
 
-    # TODO: GPT-3.5 can handle 16,385 tokens, so we need to ensure the data first in context upon retrieval, may need to summarize with GPT-4
+    filter = {}
 
-    result = index.query(
-        # namespace="eos-docs",
+    if book:
+        filter["book"] = {"$eq": book}
+    
+    if chapter:
+        filter["chapter"] = {"$eq": chapter}
+
+    results = index.query(
+        # namespace="eos-books",
         # id=ids[0],
         vector=embed,
         top_k=5,
-        include_metadata=True
-        # filter={"genre": {"$eq": "action"}}
+        include_metadata=True,
+        filter=filter
     )
 
-    return "\n\n".join([match["metadata"]["text"] for match in result["matches"]])
+    cited_results = []
+
+    for match in results["matches"]:
+        cited_results.append((
+            f"From {match['metadata']['book']} in {match['metadata']['chapter']}:\n"
+            f"`{match['metadata']['text']}`"
+        ))
+
+    return "\n\n".join(cited_results)
