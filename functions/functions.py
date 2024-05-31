@@ -2,7 +2,7 @@ from main import pc
 from main import client
 
 
-def searchBooks(summary: str, book: str = None, chapter: str = None) -> str:
+def searchBooks(summary: str, book: str | None, chapter: str | None) -> str:
     model = "text-embedding-3-small"
 
     embed = client.embeddings.create(
@@ -21,8 +21,6 @@ def searchBooks(summary: str, book: str = None, chapter: str = None) -> str:
         filter["chapter"] = {"$eq": chapter}
 
     results = index.query(
-        # namespace="eos-books",
-        # id=ids[0],
         vector=embed,
         top_k=5,
         include_metadata=True,
@@ -36,5 +34,10 @@ def searchBooks(summary: str, book: str = None, chapter: str = None) -> str:
             f"From {match['metadata']['book']} in {match['metadata']['chapter']}:\n"
             f"`{match['metadata']['text']}`"
         ))
+
+    cited_results.append(
+        "*Any text in double brackets e.g. [[ This is alt text ]] in the references above is alt text i.e. an image caption. \
+        Please treat it as such within its context.*"
+    )
 
     return "\n\n".join(cited_results)

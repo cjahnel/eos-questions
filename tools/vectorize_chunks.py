@@ -64,7 +64,6 @@ def upload_chunk(book_name: str) -> None:
 
     model = "text-embedding-3-small"
 
-    # max tokens is 8191
     data = client.embeddings.create(
         input=input,
         model=model
@@ -72,16 +71,9 @@ def upload_chunk(book_name: str) -> None:
 
     for i, chunk in enumerate(chunks):
         chunk.update({"values": data[i].embedding})
-    
-    # if len(chunks) > 100:
-        # raise Exception("Too many chunks to load at once, should be done in a batch")
 
     index = pc.Index("eos-questions")
-
-    index.upsert(
-        vectors=chunks
-        # namespace="eos-books"
-    )
+    index.upsert(vectors=chunks)
 
 if __name__ == "__main__":
     upload_chunk("get-a-grip")

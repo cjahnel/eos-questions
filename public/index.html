@@ -12,7 +12,6 @@
             message_elements = document.getElementsByTagName('article');
             lastUserMessage = message_elements[message_elements.length - 2];
             lastAssistantMessage = message_elements[message_elements.length - 1];
-            // TODO: do we need to add the function call into the conversation?
             messages.push(
                 {"role": "user", "content": lastUserMessage.innerText},
                 {"role": "assistant", "content": lastAssistantMessage.innerText}

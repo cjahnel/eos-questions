@@ -12,5 +12,4 @@ def delete_all_chunks():
     index.delete(delete_all=True)
 
 if __name__ == "__main__":
-    # delete_all_chunks()
-    pass
+    delete_all_chunks()
