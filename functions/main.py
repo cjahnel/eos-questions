@@ -1,4 +1,5 @@
 import json
+import markdown
 import os
 from firebase_functions import https_fn
 # from firebase_admin import initialize_app
@@ -95,7 +96,7 @@ def new_message(req: https_fn.Request) -> https_fn.Response:
 
     # If GPT generated a response, add it to the conversation and return dialogue
     if assistant_msg.content:
-        assistant_msg_formatted = assistant_msg.content.replace("\n", "<br>")
+        assistant_msg_formatted = markdown.markdown(assistant_msg.content) # .replace("\n", "<br>")
         return render_template_string(template_string, user_msg=user_msg, assistant_msg=assistant_msg_formatted)
 
     # No message was given, so get the function
@@ -140,7 +141,7 @@ def new_message(req: https_fn.Request) -> https_fn.Response:
 
     # TODO: Add streaming?
 
-    assistant_msg_formatted = assistant_msg.content.replace("\n", "<br>")
+    assistant_msg_formatted = markdown.markdown(assistant_msg.content) # .replace("\n", "<br>")
 
     # Return the dialogue
     return render_template_string(template_string, user_msg=user_msg, assistant_msg=assistant_msg_formatted)
