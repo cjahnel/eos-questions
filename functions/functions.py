@@ -35,9 +35,4 @@ def searchBooks(summary: str, book: str | None, chapter: str | None) -> str:
             f"`{match['metadata']['text']}`"
         ))
 
-    cited_results.append(
-        "*Any text in double brackets e.g. [[ This is alt text ]] in the references above is alt text i.e. an image caption. \
-        Please treat it as such within its context.*"
-    )
-
     return "\n\n".join(cited_results)
